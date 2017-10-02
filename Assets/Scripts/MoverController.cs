@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class MoverController : MonoBehaviour {
     Mover discover;
-    public Attractor planet;
+    public Planet planet;
     public Vector2 wind;
     public Vector2 gravity;
 
@@ -15,8 +15,8 @@ public class MoverController : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         discover = GameObject.Find("Discover").GetComponent<Mover>();
-        //wind = new Vector2(0.01f, 0.0f);
-        //gravity = new Vector2(0.0f, -0.1f);
+        wind = new Vector2(0.01f, 0.0f);
+        gravity = new Vector2(0.0f, -0.1f);
 	}
 	
 	// Update is called once per frame
@@ -27,12 +27,13 @@ public class MoverController : MonoBehaviour {
         }
 
 
-        discover.ApplyForce(wind);
-        discover.ApplyForce(gravity);
+        discover.ApplyForce(planet.Attract(discover));
+
         if (applyFriction)
         {
             discover.ApplyForce(GetFriction(discover)); 
         }
+
         discover.Move();
 	}
 
