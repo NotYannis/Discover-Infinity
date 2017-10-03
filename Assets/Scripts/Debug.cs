@@ -11,10 +11,14 @@ public class Debug : MonoBehaviour {
 
     Text acc;
     Text vel;
-	// Use this for initialization
-	void Start () {
+    Text accmax;
+    Text velmax;
+    // Use this for initialization
+    void Start () {
         vel = GameObject.Find("vel").GetComponent<Text>();
         acc = GameObject.Find("acc").GetComponent<Text>();
+        velmax = GameObject.Find("velmax").GetComponent<Text>();
+        accmax = GameObject.Find("accmax").GetComponent<Text>();
         m = GameObject.Find("Discover").GetComponent<Mover>();
 	}
 	
@@ -29,8 +33,10 @@ public class Debug : MonoBehaviour {
             maxAcc = m.acceleration;
         }
 
-        vel.text = "Vel : " + m.velocity.ToString() + ", Max : " + maxVel.ToString();
+        vel.text = "Vel : " + m.velocity.ToString();
+        velmax.text = "Max : " + maxVel.ToString();
+        acc.text = "Acc : " + m.acceleration.ToString();
+        accmax.text = "Max : " + maxAcc.ToString();
 
-        acc.text = "Acc : " + m.acceleration.ToString() + ", Acc : " + maxAcc.ToString();
-	}
+    }
 }

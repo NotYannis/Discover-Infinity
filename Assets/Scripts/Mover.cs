@@ -4,11 +4,15 @@ using UnityEngine;
 
 public class Mover : MonoBehaviour {
     Vector2 basePos;
+
     [System.NonSerialized]
     public Vector2 velocity;
     [System.NonSerialized]
     public Vector2 acceleration;
+
     public float mass;
+    public bool limitVelocity;
+    public float maxVelocity = 1.0f;
 
 	// Use this for initialization
 	void Start () {
@@ -20,12 +24,30 @@ public class Mover : MonoBehaviour {
         force /= mass;
         acceleration += force;
     }
-
+    
     public void Move()
     {
         velocity += acceleration;
-        transform.position += (Vector3)velocity;
+        if (limitVelocity)
+        {
+            float mag = velocity.magnitude;
+            if (mag < -maxVelocity)
+            {
+                velocity = velocity.normalized;
+                velocity *= -maxVelocity;
+            }
+            else if (mag > maxVelocity)
+            {
+                velocity = velocity.normalized;
+                velocity *= maxVelocity;
+            }
+        }
+
         acceleration.Scale(Vector3.zero);
+        transform.position += (Vector3)velocity * Time.deltaTime;
+
+        float angle = Mathf.Atan2(velocity.y, velocity.x) * Mathf.Rad2Deg;
+        transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
     }
 
     public void Reset()

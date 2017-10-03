@@ -9,8 +9,6 @@ public class MoverController : MonoBehaviour {
     public Vector2 gravity;
 
     public float frictionCoeff = 0.01f;
-    public float normalForce = 1.0f;
-    public bool applyFriction = true;
 
 	// Use this for initialization
 	void Start () {
@@ -26,16 +24,15 @@ public class MoverController : MonoBehaviour {
             discover.Reset();
         }
 
-
-        discover.ApplyForce(planet.Attract(discover));
-
-        if (applyFriction)
+        //Attract
+        float distance = ((Vector2)discover.transform.position - (Vector2)planet.transform.position).magnitude;
+        if(distance > planet.minDistance && distance < planet.maxDistance)
         {
-            discover.ApplyForce(GetFriction(discover)); 
+            discover.ApplyForce(planet.Attract(discover));
         }
 
         discover.Move();
-	}
+    }
 
     Vector2 GetFriction(Mover m)
     {
