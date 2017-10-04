@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class MoverController : MonoBehaviour {
     Mover discover;
-    public Planet planet;
+    public Planet[] system;
     public Vector2 wind;
     public Vector2 gravity;
 
@@ -15,6 +15,7 @@ public class MoverController : MonoBehaviour {
         discover = GameObject.Find("Discover").GetComponent<Mover>();
         wind = new Vector2(0.01f, 0.0f);
         gravity = new Vector2(0.0f, -0.1f);
+        system = GameObject.Find("System").GetComponentsInChildren<Planet>();
 	}
 	
 	// Update is called once per frame
@@ -25,10 +26,14 @@ public class MoverController : MonoBehaviour {
         }
 
         //Attract
-        float distance = ((Vector2)discover.transform.position - (Vector2)planet.transform.position).magnitude;
-        if(distance > planet.minDistance && distance < planet.maxDistance)
+        foreach(Planet p in system)
         {
-            discover.ApplyForce(planet.Attract(discover));
+            float distance = ((Vector2)discover.transform.position - (Vector2)p.transform.position).magnitude;
+            if (distance > p.minDistance && distance < p.maxDistance)
+            {
+                discover.ApplyForce(p.Attract(discover));
+            }
+            
         }
 
         discover.Move();
