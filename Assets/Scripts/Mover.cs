@@ -22,7 +22,7 @@ public class Mover : MonoBehaviour {
     public void ApplyForce(Vector2 force)
     {
         force /= mass;
-        acceleration += force;
+        acceleration += force * Time.deltaTime;
     }
     
     public void Move()
@@ -44,7 +44,7 @@ public class Mover : MonoBehaviour {
         }
 
         acceleration.Scale(Vector3.zero);
-        transform.position += (Vector3)velocity * Time.deltaTime;
+        transform.position += (Vector3)velocity;
 
         float angle = Mathf.Atan2(velocity.y, velocity.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);

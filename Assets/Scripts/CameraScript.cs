@@ -9,8 +9,7 @@ public class CameraScript : MonoBehaviour {
     private Vector3 offset;
     public float lerpForce = 0.5f;
     public bool isFollowing;
-
-
+    
 
 	// Use this for initialization
 	void Start () {

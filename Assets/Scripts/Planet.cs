@@ -13,7 +13,19 @@ public class Planet : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
     private GameObject gravityField;
     private CameraScript mainCamera;
     private bool isDragged;
+    private Vector2 lastPos;
     private Vector2 currentPos;
+    private bool goBack;
+
+    //Ellipse movement
+    public Vector2 systemCenter = Vector2.zero;
+    public float semimajor;
+    public float semiminor;
+    public float ellipsePos = 0.0f;
+    public float ellipseVelocity = 0.1f;
+
+    //Ellipse renderer
+    private LineRenderer ellipseRenderer;
 
     void Start()
     {
@@ -27,6 +39,48 @@ public class Planet : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
         gravityField.transform.localScale = new Vector3(maxDistance/gravityField.transform.lossyScale.x,
                                                         maxDistance/ gravityField.transform.lossyScale.y, 1.0f);
         minDistance = GetComponent<SpriteRenderer>().size.magnitude;
+
+        //Ellipse points;
+        float imax = 10;
+        Vector3[] points = new Vector3[(int)imax + 1 ];
+        for(float i = 1; i <= imax + 1; ++i)
+        {
+            float x = systemCenter.x + (semimajor * Mathf.Cos(Mathf.PI * (i / (imax / 2.0f))));
+            float y = systemCenter.y + (semiminor * Mathf.Sin(Mathf.PI * (i / (imax / 2.0f))));
+            points[(int)i - 1] = new Vector3(x, y, transform.position.z);
+        }
+
+        
+        Vector3[] smoothPoints = LineSmoother.SmoothLine(points, 0.1f);
+
+        ellipseRenderer = GetComponent<LineRenderer>();
+        ellipseRenderer.positionCount = smoothPoints.Length;
+        ellipseRenderer.SetPositions(smoothPoints);
+    }
+
+    void Update()
+    {        
+        if(transform.position != EllipseNextPosition())
+        {
+            lastPos = transform.position;
+        }
+
+        transform.position = EllipseNextPosition();
+
+        if (!isDragged)
+        {
+            ellipsePos += ellipseVelocity;
+        }
+    }
+
+    Vector3 EllipseNextPosition()
+    {
+        ellipsePos %= 2 * Mathf.PI;
+
+        float x = systemCenter.x + (semimajor * Mathf.Cos(ellipsePos));
+        float y = systemCenter.y + (semiminor * Mathf.Sin(ellipsePos));
+
+        return new Vector3(x, y, transform.position.z);
     }
 
     public Vector2 Attract(Mover m)
@@ -46,12 +100,14 @@ public class Planet : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
 
     public void OnPointerDown(PointerEventData eventData)
     {
+        isDragged = true;
         Time.timeScale = 0.3f;
         mainCamera.StopFollowing();
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
+        isDragged = false;
         Time.timeScale = 1.0f;
         mainCamera.StartFollowing();
     }
@@ -69,15 +125,35 @@ public class Planet : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
         currentPos = Camera.main.ScreenToWorldPoint(eventData.position);
 
         Vector2 deltaPos = currentPos - previousPos;
-        transform.position += (Vector3)deltaPos;
+        Vector2 nextPos = (Vector2)EllipseNextPosition() - lastPos;
+
+        float angle = Vector2.Angle(nextPos, deltaPos);
+        int dragSpeed = 60;
+        float velocity = 1 - (angle / 90);
+        float ellipsePosTemp = ellipsePos;
+
+        if (goBack)
+        {
+            ellipsePos -= ellipseVelocity * velocity * dragSpeed;
+        }
+        else
+        {
+            ellipsePos += ellipseVelocity * velocity * dragSpeed;
+        }
+
+        if (ellipsePos < ellipsePosTemp && !goBack)
+        {
+            goBack = true;
+        }
+        else if(ellipsePos > ellipsePosTemp && goBack)
+        {
+            goBack = false;
+        }
+
+
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
     }
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
 }
